@@ -10,7 +10,7 @@ Pi-Hole is great. It blocks ads and tracking at a DNS level, and is still surpri
 
 -   Sometimes, port forwarding on my router just... stops. It's dumb.
 
-Higher-end hardware can absolutely do a lot of this, but most home hardware cannot. Fortunately, with Pi-Hole and the help of a couple of extra bits of software, your lowly Raspberry Pi can do all of this!
+Higher-end hardware can absolutely do a lot of this, but most home hardware cannot. Fortunately, with Pi-Hole and a couple of extra bits of software, your lowly Raspberry Pi can do all of this!
 
 If you're feeling adventurous, take a look at how I rebuilt my entire home network with a Pi-Hole truly in the middle. Maybe you can do the same with some time and patience.
 
@@ -38,7 +38,7 @@ If you're feeling adventurous, take a look at how I rebuilt my entire home netwo
 
 -   A laptop to do configuration changes
 
--   Determine if your ISP supports IPv6. Mine does
+-   Determine if your ISP supports IPv6. Mine does, so I'll cover it as an optional 2nd bit.
 
 ## Steps
 
@@ -91,7 +91,7 @@ I'm not setting a static IP for eth0 (the modem), so it's going to aquire an IP 
 
 On eth1, we're establishing that the Pi's PI address will be 192.168.1.1, with a subnet mask of 255.255.255.0
 
-**13.**  Edit /etc/iptables/rules.4 on the Pi to match this file. TODO: Insert link
+**13.**  Edit /etc/iptables/rules.4 on the Pi to [match this file here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv4/rules.v4)
 
 There's a lot going on here, so let's break it down a bit
 
@@ -192,7 +192,7 @@ Note that your ISP must support ISP for this to work. You can use a 4to6 gateway
 
 The first line enables forwarding of IPv6 Packets between network interfaces. The second one allows the Pi to accept Router Advertisements on eth0. This is necessary for automatic IPv6 configuration from your ISP
 
-**2.**  Edit /etc/dhcpcd.conf and configure it to look like this example here. TODO: Insert Link
+**2.**  Edit /etc/dhcpcd.conf and configure it to look [like this example here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv6/dhcpcd.conf).
 
 ``noipv6rs`` globally turns off router solicitations and acceptance of router advertisements.
 
@@ -207,7 +207,7 @@ The first line enables forwarding of IPv6 Packets between network interfaces. Th
 
 These two lines set the Interface Association Identifier (iaid) to 1, then requests a Delegated Prefix from it and assigns it to eth1. The 60 is the prefix length you get from your ISP, and the 64 is the length of the one you're assigning to eth1. You can get these numbers by inspecting network traffic from your router. I cheated and got it from here: <https://www.reddit.com/r/ipv6/comments/deb531/linux_xfinity_dhcpcd_and_getting_a_local_prefix/>
 
-**3.**  Create a new file named /etc/dnsmasq.d/05-pirouter.conf with the contents from here. TODO: Insert link. This code does three things:
+**3.**  Create a new file named /etc/dnsmasq.d/05-pirouter.conf [with the contents from here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv6/05-pirouter.conf). This code does three things:
 
   -  Broadcasts itself as the IPv6 DNS server
 
@@ -217,7 +217,7 @@ These two lines set the Interface Association Identifier (iaid) to 1, then reque
 
   This setting really closely mirrors the one that gets set when you check off "Enable IPv6 support (SLAAC + RA)" in the Pi-Hole web interface. The difference is, this custom one also states in the Router Advertisement that it is the Router. By the way, definitely don't check off that box in the Pi-Hole Web Interface. It conflicts with this config
 
-**4.**  Edit /etc/iptables/rules.v6 to match the file here. TODO: Insert link. Again, there's a lot going on in this file, and it looks different from the IPv4 rules.
+**4.**  Edit /etc/iptables/rules.v6 [to match the file here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv6/rules.v6). Again, there's a lot going on in this file, and it looks different from the IPv4 rules.
 
 **The \*nat section is a bit of a no-no with IPv6... but I'm doing it anyway, just minimally**
 
