@@ -10,7 +10,7 @@ Pi-Hole is great. It blocks ads and tracking at a DNS level, and is still surpri
 
 -   Sometimes, port forwarding on my router just... stops. It's dumb.
 
-Higher-end hardware can absolutely do a lot of this, but most home hardware cannot. Fortunately, with Pi-Hole and a couple of extra bits of software, your lowly Raspberry Pi can do all of this!
+Higher-end hardware can absolutely do a lot of this, but most home hardware cannot. Fortunately, with Pi-Hole and a couple of extra bits of software, your lowly Raspberry Pi can do all of this! Here is a video showing the DNS force-to-PiHole in action: [https://www.youtube.com/watch?v=oG5o5yc3M2Q](https://www.youtube.com/watch?v=oG5o5yc3M2Q)
 
 If you're feeling adventurous, I detail herein how I rebuilt my entire home network with a Pi-Hole truly in the middle. Maybe you can do the same with some time and patience.
 
