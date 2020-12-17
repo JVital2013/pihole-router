@@ -58,7 +58,9 @@ If you're feeling adventurous, take a look at how I rebuilt my entire home netwo
 
 **6.**  Plug an ethernet cord from your modem into the onboard ethernet port.
 
-At this point, your Modem, Pi, and AP should be connected like this: TODO
+At this point, your Modem, Pi, and AP should be connected like this:
+
+<img src="https://github.com/JVital2013/pihole-router/raw/main/images/diagram-setup.jpg" width="500">
 
 **7.**  Boot the Pi. Let it do its initial configuration, and do things like change the pi account password, set timezone, etc.
 
@@ -117,7 +119,9 @@ There's a lot going on here, so let's break it down a bit
     Subnet Mask: 255.255.255.0
     Gateway: 192.168.1.1
 
-**17.**  At this point, your new network should look something like this: TODO
+**17.**  At this point, your new network should look something like this:
+
+<img src="https://github.com/JVital2013/pihole-router/raw/main/images/diagram-intermediate.jpg" width="600">
 
 **18.**  SSH into the pi from your laptop (use the 192.168.1.1 as the IP). Then, run `pihole -r`. When prompted, choose reconfigure. Choose "eth1" as the interface you're using (USB Ethernet). It should confirm that you're using 192.168.1.1 as the IP; go ahead and confirm those settings. Accept everything else
 
@@ -172,6 +176,8 @@ There's a lot going on here, so let's break it down a bit
 OK, big moment: take a breath and try to load something on the internet. If you did everything right, you should be greeted with a successfully loaded web page!
 
 If you want to test the rule that redirects all DNS to the Pi-Hole, configure 8.8.8.8 as a static DNS server on your laptop. It should still work, but you'll still see all queries on the Pi-Hole log and ads will be blocked. Neat!
+
+<img src="https://github.com/JVital2013/pihole-router/raw/main/images/diagram-final-v4.jpg" width="600">
 
 ## IPv6
 
