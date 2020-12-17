@@ -1,4 +1,4 @@
-# Pi-Hole - Router Edition
+# Extending Pi-Hole into a Network Router
 
 Pi-Hole is great. It blocks ads and tracking at a DNS level, and is still surprisingly effective many years after it was first introduced. However, home networks often lack some tools that would truly make Pi-Hole great.
 
@@ -12,7 +12,7 @@ Pi-Hole is great. It blocks ads and tracking at a DNS level, and is still surpri
 
 Higher-end hardware can absolutely do a lot of this, but most home hardware cannot. Fortunately, with Pi-Hole and a couple of extra bits of software, your lowly Raspberry Pi can do all of this! Here is a video showing the DNS force-to-PiHole in action: [https://www.youtube.com/watch?v=oG5o5yc3M2Q](https://www.youtube.com/watch?v=oG5o5yc3M2Q)
 
-If you're feeling adventurous, I detail herein how I rebuilt my entire home network with a Pi-Hole truly in the middle. Maybe you can do the same with some time and patience.
+If you're feeling adventurous, I detail herein how I rebuilt my entire home network with a Pi-Hole truly in the middle. You can do the same, with some time and patience!
 
 ## Before you get started, there are a couple of things to keep in mind
 
@@ -30,7 +30,7 @@ If you're feeling adventurous, I detail herein how I rebuilt my entire home netw
 
 -   Internet Modem that can be put into bridged mode. I'm using a TP-Link TC-W7960 with an XFinity (Cable) residential internet connection.
 
--   Raspberry Pi, or some other server capable of running Pi-Hole. It should probably be a physical server, but if you're crafty enough you can probably virtualize it somehow. I'm using a Raspberry Pi 4 to get an edge on Ethernet speeds.
+-   Raspberry Pi, or some other computer/server capable of running Pi-Hole. It should probably be a physical server, but if you're crafty enough you can probably virtualize it somehow. I'm using a Raspberry Pi 4 to get an edge on Ethernet speeds.
 
 -   The server needs to have 2 ethernet ports. I use an RTL8153 Gigabit Ethernet Adapter for my 2nd port. Specifically, I use this one: <https://www.bestbuy.com/site/insignia-usb-3-0-to-gigabit-ethernet-adapter-white/3510527.p?skuId=3510527>
 
@@ -91,9 +91,7 @@ I'm not setting a static IP for eth0 (the modem), so it's going to aquire an IP 
 
 On eth1, we're establishing that the Pi's IP address will be 192.168.1.1, with a subnet mask of 255.255.255.0
 
-**13.**  Edit /etc/iptables/rules.4 on the Pi to [match this file here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv4/rules.v4)
-
-There's a lot going on here, so let's break it down a bit
+**13.**  Edit /etc/iptables/rules.4 on the Pi to [match this file here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv4/rules.v4). There's a lot going on here, so let's break it down a bit
 
 **The \*nat section has 3 rules of interest.**
 
@@ -103,11 +101,11 @@ There's a lot going on here, so let's break it down a bit
 
 **The \*filter section protects you**
 
--   The "RELATED,ESTABLISHED -j ACCEPT" line makes the Pi accept any inbound packets that are a part of an established connection
+-   The `-A INPUT -i eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT` line makes the Pi accept any inbound packets that are a part of an established connection
 
--   The INPUT...DROP line drops any other packets coming in from the internet. This means people won't be able to connect to the Pi across the internet
+-   The `-A INPUT -i eth0 -j DROP` line drops any other packets coming in from the internet. This means people won't be able to connect to the Pi across the internet
 
--   The FORWARD ... 853 ... DROP line prevents DNS over TLS
+-   The `-A FORWARD -i eth1 -m tcp -p tcp --dport 853 -j DROP` lines prevents DNS over TLS
 
 **14.**  Edit /etc/sysctl.conf. Look for the line that has `net.ipv4.ip_forward=1` and uncomment it. This enables forwarding packets between the network interfaces
 
@@ -215,7 +213,7 @@ These two lines set the Interface Association Identifier (iaid) to 1, then reque
 
   -  Enables both Router Advertisements for SLAAC, and DHCPv6 configuration. Announces self as IPv6 router
 
-  This setting really closely mirrors the one that gets set when you check off "Enable IPv6 support (SLAAC + RA)" in the Pi-Hole web interface. The difference is, this custom one also states in the Router Advertisement that it is the Router. By the way, definitely don't check off that box in the Pi-Hole Web Interface. It conflicts with this config
+  This setting really closely mirrors the one that gets set when you check off "Enable IPv6 support (SLAAC + RA)" in the Pi-Hole web interface. The difference is, this custom one also states in the Router Advertisement that it is the Router. **By the way, definitely don't check off that box in the Pi-Hole Web Interface. It conflicts with this config.**
 
 **4.**  Edit /etc/iptables/rules.v6 [to match the file here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv6/rules.v6). Again, there's a lot going on in this file, and it looks different from the IPv4 rules.
 
@@ -227,21 +225,23 @@ These two lines set the Interface Association Identifier (iaid) to 1, then reque
 
 **The \*filter section protects you**
 
--   The "RELATED,ESTABLISHED -j ACCEPT" line makes the Pi accept any inbound packets that are a part of an established connection
+-   The `-A INPUT -i eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT` line makes the Pi accept any inbound packets that are a part of an established connection
 
--   The ipv6-icmp line is needed for Neighbor Discovery and overall IPv6 functionality. It's possible to lock this down more, but that often breaks RFC compliance. This line does allow pinging your devices from the internet
+-   The `-A INPUT -i eth0 -p ipv6-icmp -j ACCEPT` line is needed for Neighbor Discovery and overall IPv6 functionality. It's possible to lock this down more, but that often breaks RFC compliance. This line does allow pinging your devices from the internet
 
--   The INPUT...DROP line drops any other packets coming in from the internet. This means people won't be able to connect to your devices across the internet
+-   The `-A INPUT -i eth0 -j DROP` line drops any other packets coming in from the internet. This means people won't be able to connect to your devices across the internet
 
--   Those lines are repeated on the FORWARD chain as well to protect devices on the network.
+-   Those lines are repeated on the FORWARD chain as well to protect devices on the network. DHCP from eth0 is blocked as it is not needed or wanted.
 
--   The FORWARD ... 853 ... DROP line prevents DNS over TLS
+-   The `-A FORWARD -i eth1 -m tcp -p tcp --dport 853 -j DROP` line prevents DNS over TLS
 
 **5.**  Run `pihole -r` and reconfigure Pi-Hole with IPv6 Enabled. You can select all the default settings as it should read them correctly from last time, plus the new IPv6 address
 
-**6.**  Reboot the Pi, and disconnect/reconnect your devices to force them to refresh the connection
+**6.** Make sure /etc/dhcpcd.conf still looks like it does [here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv6/dhcpcd.conf).
 
-**7.**  On the Pi, run `ip -6 addr`. It should look something like this (IP addresses anonymized to protect the innocent). The important part is that there is a public IP (non-fe80) on eth1
+**7.**  Reboot the Pi, and disconnect/reconnect your devices to force them to refresh the connection
+
+**8.**  On the Pi, run `ip -6 addr`. It should look something like this (IP addresses anonymized to protect the innocent). The important part is that there is a public IP (non-fe80) on eth1
 
         1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 state UNKNOWN qlen 1000
 
