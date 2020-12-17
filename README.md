@@ -89,7 +89,7 @@ At this point, your Modem, Pi, and AP should be connected like this:
 
 I'm not setting a static IP for eth0 (the modem), so it's going to aquire an IP via DHCP. That's because my ISP, XFinity, uses DHCP to issue IPs. That's good enough for my needs! Note that not all ISPs hand out IPs with DHCP. Some require something more complex, like PPPoE. This isn't necessarily a roadblock and can be configured to work - I did it before at an old residence with pppoeconf. However, it's more complicated and won't be discussed here.
 
-On eth1, we're establishing that the Pi's PI address will be 192.168.1.1, with a subnet mask of 255.255.255.0
+On eth1, we're establishing that the Pi's IP address will be 192.168.1.1, with a subnet mask of 255.255.255.0
 
 **13.**  Edit /etc/iptables/rules.4 on the Pi to [match this file here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv4/rules.v4)
 
@@ -269,7 +269,7 @@ These two lines set the Interface Association Identifier (iaid) to 1, then reque
 
 ## Doing other network analysis
 
-Since the pi is sitting in the middle of all your internet traffic now, you can do all kinds of monitoring. I'm using ntopng to do that ([www.ntop.org](http://www.ntop.org)). Ntopng is very powerful with a ton of features. It can show you the Layer-7 apps being used on your network, top talkers, top destinations, the countries the servers you're talking to are in, and much more. It has a free version, but I'm paying for the Pro embedded license (50 Euro) and I think it's worth every penny.
+Since the pi is sitting in the middle of all your internet traffic now, you can do all kinds of monitoring. I'm using ntopng to do that ([https://www.ntop.org/products/traffic-analysis/ntop/](https://www.ntop.org/products/traffic-analysis/ntop/)). Ntopng is very powerful with a ton of features. It can show you the Layer-7 apps being used on your network, top talkers, top destinations, the countries the servers you're talking to are in, and much more. It has a free version, but I'm paying for the Pro embedded license (50 Euro) and I think it's worth every penny.
 
 There's also simpler software around like darkstat. It can be installed with `sudo apt install darkstat`. <https://unix4lyfe.org/darkstat/>
 
