@@ -1,8 +1,8 @@
-# Pi-Hole Router Edition
+# Pi-Hole - Router Edition
 
 Pi-Hole is great. It blocks ads and tracking at a DNS level, and is still surprisingly effective many years after it was first introduced. However, home networks often lack some tools that would truly make Pi-Hole great.
 
--   It would be great if home routers could shunt all port 53 (DNS) traffic to the Pi-Hole, no matter the IP Specified. Would be great for preventing those sneaky IoT devices from bypassing your filtering
+-   It would be great if home routers could shunt all port 53 (DNS) traffic to the Pi-Hole, no matter the DNS server specified. It would be great for preventing those sneaky IoT devices from bypassing your filtering
 
 -   It would be great if I could prevent outbound connections to port 853 (DNS over TLS) from my devices
 
@@ -12,25 +12,25 @@ Pi-Hole is great. It blocks ads and tracking at a DNS level, and is still surpri
 
 Higher-end hardware can absolutely do a lot of this, but most home hardware cannot. Fortunately, with Pi-Hole and a couple of extra bits of software, your lowly Raspberry Pi can do all of this!
 
-If you're feeling adventurous, take a look at how I rebuilt my entire home network with a Pi-Hole truly in the middle. Maybe you can do the same with some time and patience.
+If you're feeling adventurous, I detail herein how I rebuilt my entire home network with a Pi-Hole truly in the middle. Maybe you can do the same with some time and patience.
 
 ## Before you get started, there are a couple of things to keep in mind
 
--   This guide is mostly for educational purposes. I am not a networking expert, so some of my firewall rules may have gaps. If you spot a problem, let me know!
+-   This guide is mostly for educational purposes. I am not a networking expert, so some of my firewall rules may have gaps. If you spot a problem, let me know! Half the reason I'm sharing this is for the internet to tell me how wrong I am
 
 -   Every ISP provides their connectivity differently. This guide may not work for you word-for-word, but it should get you on the right track
 
 -   Make sure you get permission from your network owner before doing this
 
--   Even if you're the network owner, get permission from yourself. You really gotta think long and hard about doing this. Your Pi will be the only security device sitting between your lousy, rusted out excuse of a computer and the big mean internet. Does that sound like a good idea? No! Does it sound fun? Yes!
+-   Even if you're the network owner, get permission from yourself. You really gotta think long and hard about doing this. Your Pi will be the only security device sitting between your lousy, rusted-out computer and the big mean internet. Does that sound like a good idea? No! Does it sound fun? Yes!
 
 -   I'm not responsible for anything bad that happens. I'm not responsible for breaking your internet. I'm not responsible for ticking off your ISP. Finally, I'm not responsible for your significant other getting angry that their internet isn't working for the 47th time that day because you were tinkering with "one more thing" on "your stupid berry computer"
 
 ## What you need
 
--   Internet Modem that can be put into bridged mode. I'm using a TP-Link TC-W7960 with an XFinity (Cable) residential internet.
+-   Internet Modem that can be put into bridged mode. I'm using a TP-Link TC-W7960 with an XFinity (Cable) residential internet connection.
 
--   Raspberry Pi, or some other server capable of running Pi-Hole. It should probably be a physical server, but if you're crafty enough you can probably virtualize it somehow. I'm using a Raspberry Pi 4 to get an edge on Ethernet speeds
+-   Raspberry Pi, or some other server capable of running Pi-Hole. It should probably be a physical server, but if you're crafty enough you can probably virtualize it somehow. I'm using a Raspberry Pi 4 to get an edge on Ethernet speeds.
 
 -   The server needs to have 2 ethernet ports. I use an RTL8153 Gigabit Ethernet Adapter for my 2nd port. Specifically, I use this one: <https://www.bestbuy.com/site/insignia-usb-3-0-to-gigabit-ethernet-adapter-white/3510527.p?skuId=3510527>
 
@@ -38,13 +38,13 @@ If you're feeling adventurous, take a look at how I rebuilt my entire home netwo
 
 -   A laptop to do configuration changes
 
--   Determine if your ISP supports IPv6. Mine does, so I'll cover it as an optional 2nd bit.
+-   Determine if your ISP supports IPv6. Mine does, so I'll cover it as an optional part
 
 ## Steps
 
-**1.**  Have your modem running in it's normal "Router" mode with a working internet connection.
+**1.**  Have your modem running in it's normal "router" mode with a working internet connection.
 
-**2.**  Image an SD card with Raspberry Pi OS Lite and put it in the Pi.
+**2.**  Image an SD card with Raspberry Pi OS Lite \([https://www.raspberrypi.org/software/operating-systems/](https://www.raspberrypi.org/software/operating-systems/)\) and put it in the Pi.
 
 **3.**  Put your wireless router into AP mode. From here on, I'm going to call this your "AP" to avoid confusion. Configure the Wi-Fi network as desired on the AP (SSID, Security, Channel, etc). Also configure a static IP on it:
 
@@ -71,13 +71,13 @@ At this point, your Modem, Pi, and AP should be connected like this:
         sudo apt install iptables-persistent #Say yes at the prompt to save current rules
         sudo reboot
 
-**9.**  Do a typical Pi-Hole installation. Choose eth0 as the interface you're using (Onboard Ethernet). Set a static IP when prompted; just use the current one for now. This will be changing later. Use IPv4 only for now. We'll get to IPv6 later. Set everything else in the Pi-Hole setup however you want.
+**9.**  Do a typical Pi-Hole installation as instructed at [https://github.com/pi-hole/pi-hole/#one-step-automated-install](https://github.com/pi-hole/pi-hole/#one-step-automated-install). Choose eth0 as the interface you're using (Onboard Ethernet). Set a static IP when prompted; just use the current one for now. This will be changing later. Use IPv4 only for now; we'll get to IPv6 later. Set everything else in the Pi-Hole setup however you want.
 
-**10.**  Test Pi-Hole and make sure it's working as-is (eg. use dig or nslookup to do a dns lookup)
+**10.**  Test Pi-Hole and make sure it's working as-is (eg. use dig or nslookup to query a record from it)
 
 **From here on, we're turning your network upside down! Make sure you won't need the internet for a while in case everything goes south.**
 
-**11.**  Put your modem into bridged mode. This makes it so that the modem doesn't do any routing/DHCP/etc, and passes it off to another device instead. Each modem is different, so look this up in the manual or via Google
+**11.**  Put your modem into bridged mode. This makes it so that the modem doesn't do any routing/DHCP/etc, and passes it off to another device instead. Each modem is different, so look this up how to do this in your modem's manual.
 
 **12.**  Edit /etc/dhcpcd.conf on the Pi. Scroll down until you see the configs for "interface eth0" and "interface eth1" (eth1 may not be there). Comment them out and replace it with the following:
 
@@ -275,20 +275,20 @@ There's also simpler software around like darkstat. It can be installed with `su
 
 ## Some other thoughts on the project
 
-  - If your ISP supports IPv6 and you don't want to use it on your network, you should disable IPv6 completely. If you leave it enabled, your Pi may be able to communicate across IPv6 without a firewall. That's no good! To fix the problem, disable IPv6 by adding the following lines to /etc/sysctl.conf:
+  - If your ISP supports IPv6 but you don't want to use it on your network, you should disable IPv6 completely. If you leave it enabled without configuring everything else, your Pi may be able to communicate across IPv6 without a firewall. That's no good! To fix the problem, disable IPv6 by adding the following lines to /etc/sysctl.conf:
 
-    net.ipv6.conf.all.disable_ipv6=1
-    net.ipv6.conf.default.disable_ipv6=1
-    net.ipv6.conf.lo.disable_ipv6=1
+        net.ipv6.conf.all.disable_ipv6=1
+        net.ipv6.conf.default.disable_ipv6=1
+        net.ipv6.conf.lo.disable_ipv6=1
 
   - Blocking DNS over HTTPS is... somewhat possible. You can block port 443 on known DoH IPs, but you can't protect yourself from the little DoH servers nobody knows about. These are the ones you need to worry about anyway, so I find it's best to ignore DoH.
 
-  - OSs other than Raspbian will probably work, as long as Pi-Hole supports it. You'll certainly run into differences, however!
+  - OSs other than Raspberry Pi OS will probably work, as long as Pi-Hole supports it. You'll certainly run into differences, however!
 
-  - On the router, bridged mode is needed to avoid a double-NAT. You can alternatively use the "DMZ" mode of most routers to forward packets to a static IP configured on eth0. If you do this, you can also go less hard-core on the iptables rules for IPv6 if you keep the modem's firewall turned on
+  - On the modem, bridged mode is needed to avoid a double-NAT. You can alternatively use the "DMZ" mode of most routers to forward packets to a static IP configured on eth0.
 
-  - This is fully compatible with common methods of using unbound or cloudflared as your upsteam DNS
+  - This is fully compatible with common methods of using unbound or cloudflared as your upsteam DNS for Pi-Hole
 
-  - I am also using PiVPN to set up OpenVPN. This seems to work well, but OpenVPN only seems to play nicely with IPv4. Oh well. Don't forget to forward port 1194 in your iptables rules.4!
+  - I am also using PiVPN to set up OpenVPN. This seems to work well, but OpenVPN only seems to play nicely with IPv4. Oh well. Don't forget to forward port 1194 in your /etc/iptables/rules.4 file!
 
   - Pi-Hole is not necessary and you can use dnsmasq instead, but you're on your own for configuring it
