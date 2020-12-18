@@ -181,7 +181,7 @@ If you want to test the rule that redirects all DNS to the Pi-Hole, configure 8.
 
 So far, we haven't handled IPv6 - just IPv4. If you don't need it, great! But, IPv6 is the future. There are places in the world that only offer IPv6-only internet already, so it would behoove you to learn it now. Besides, if you're reading this, you're the inquizitive type! So, here's how to get IPv6 working.
 
-Note that your ISP must support ISP for this to work. You can use a 4to6 gateway, but that's outside the scope of this project.
+Note that your ISP must support IPv6 for this to work. You can use a 4to6 gateway, but that's outside the scope of this project.
 
 **1.**  Edit /etc/sysctl.conf and add the following lines:
 
