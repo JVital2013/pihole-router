@@ -287,7 +287,7 @@ There's also simpler software around like darkstat. It can be installed with `su
 
   - On the modem, bridged mode is needed to avoid a double-NAT. You can alternatively use the "DMZ" mode of most routers to forward packets to a static IP configured on eth0.
 
-  - This is fully compatible with common methods of using unbound or cloudflared as your upsteam DNS for Pi-Hole
+  - This is fully compatible with common methods of using unbound or cloudflared as your upstream DNS for Pi-Hole
 
   - I am also using PiVPN to set up OpenVPN. This seems to work well, but OpenVPN only seems to play nicely with IPv4. Oh well. Don't forget to forward port 1194 in your /etc/iptables/rules.4 file!
 
