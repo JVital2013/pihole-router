@@ -91,7 +91,7 @@ I'm not setting a static IP for eth0 (the modem), so it's going to aquire an IP 
 
 On eth1, we're establishing that the Pi's IP address will be 192.168.1.1, with a subnet mask of 255.255.255.0
 
-**13.**  Edit /etc/iptables/rules.4 on the Pi to [match this file here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv4/rules.v4). There's a lot going on here, so let's break it down a bit
+**13.**  Edit /etc/iptables/rules.v4 on the Pi to [match this file here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv4/rules.v4). There's a lot going on here, so let's break it down a bit
 
 **The \*nat section has 3 rules of interest.**
 
