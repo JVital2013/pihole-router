@@ -44,7 +44,7 @@ If you're feeling adventurous, I detail herein how I rebuilt my entire home netw
 
 ## Raspberry Pi setup
 
-Before changing your network, it is a good idea to get the Raspberry Pi set up as much as possible. This includes strengthening its security, since it will be what sits between the internet and your network. The security tips are taken from <https://raspberrytips.com/security-tips-raspberry-pi/>.
+Before changing your network, it is a good idea to get the Raspberry Pi set up as much as possible. This includes strengthening its security, since it will be what sits between the internet and your network.
 
 **1.** Image an SD card with Raspberry Pi OS Lite: <https://www.raspberrypi.org/software/>. The Raspberry Pi Imager works nicely. If you use the Imager, you can press Ctrl+Shift+X and it will let you set general setup values, from step 3.
 
@@ -64,34 +64,39 @@ Before changing your network, it is a good idea to get the Raspberry Pi set up a
      sudo apt update
      sudo apt full-upgrade
 
-**5.** Add a new user and disable the pi user. Since pi is the default user, it is the most common to try to attack. Don't call your new user root or admin, either. Choose a strong password. You can look this up if you are unsure what makes a password strong, but here is a reference point: <https://xkcd.com/936/>
+**5.** There are various things you can do to improve security. Rather than retyping them all, this is a good source for some things to do: <https://www.raspberrypi.org/documentation/configuration/security.md>
 
-    sudo adduser <username> sudo
-    sudo adduser <username> sudo
-    logout
-    
-Now login as the user you just created. Next disable the pi user:
+**6.** Unattended upgrades (<https://wiki.debian.org/UnattendedUpgrades>) is a package that will install security updates automatically.
 
-    passwd -l pi
-
-**6.** Turn on unattended updates so your system gets regular security patches. Note there are many options, but by default it will enable security updates:
+The wiki link has full information, but in short this will install it:
 
     sudo apt install unattended-upgrades
 
-`/etc/apt/apt.conf.d/50unattended-upgrades` is the config file, but defaults are ok. My knowledge of unattended-upgrads is limited, so you might want to research it further.
-
-Now set the schedule:
+To make it run automatically, do the following:
 
     sudo nano /etc/apt/apt.conf.d/02periodic
 
-It will be empty, paste the following lines and save the file:
+Add the following lines:
 
+    // Control parameters for cron jobs by /etc/cron.daily/apt-compat //
+
+    // Enable the update/upgrade script (0=disable)
     APT::Periodic::Enable "1";
+
+    // Do "apt-get update" automatically every n-days (0=disable)
     APT::Periodic::Update-Package-Lists "1";
+
+    // Do "apt-get upgrade --download-only" every n-days (0=disable)
     APT::Periodic::Download-Upgradeable-Packages "1";
+
+    // Run the "unattended-upgrade" security upgrade script
+    // every n-days (0=disabled)
+    // Requires the package "unattended-upgrades" and will write
+    // a log in /var/log/unattended-upgrades
     APT::Periodic::Unattended-Upgrade "1";
-    APT::Periodic::AutocleanInterval "1";
-    APT::Periodic::Verbose "2";
+
+    // Do "apt-get autoclean" every n-days (0=disable)
+    APT::Periodic::AutocleanInterval "21";
 
 **7.** Install iptables
 
