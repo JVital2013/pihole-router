@@ -101,7 +101,9 @@ Add the following lines:
 **7.** Install iptables
 
     sudo apt install iptables-persistent #Say yes at the prompt to save current rules
-    sudo reboot
+    shutdown -P now
+    
+You can unplug the ethernet from the Raspberry Pi now.
        
 
 ## Firewall Steps
@@ -116,7 +118,7 @@ Add the following lines:
 
 **3.**  Turn off the WiFi broadcast on your modem (if any)
 
-**4.**  Turn off your Pi. Disconnect the ethernet cable you had it on for general setup. Connect the USB Ethernet port to the Pi and plug an ethernet cord from it into the WAN port of the AP
+**4.**  Connect the USB Ethernet port to the Pi and plug an ethernet cord from it into the WAN port of the AP
 
 **5.**  Plug an ethernet cord from your modem into the onboard ethernet port of the Pi.
 
