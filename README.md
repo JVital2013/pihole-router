@@ -32,13 +32,24 @@ If you're feeling adventurous, I detail herein how I rebuilt my entire home netw
 
 -   Raspberry Pi, or some other computer/server capable of running Pi-Hole. It should probably be a physical server, but if you're crafty enough you can probably virtualize it somehow. I'm using a Raspberry Pi 4 to get an edge on Ethernet speeds.
 
--   The server needs to have 2 ethernet ports. I use an RTL8153 Gigabit Ethernet Adapter for my 2nd port. Specifically, I use this one: <https://www.bestbuy.com/site/insignia-usb-3-0-to-gigabit-ethernet-adapter-white/3510527.p?skuId=3510527>
+    -   The Raspberry Pi needs to have 2 ethernet ports. I use an RTL8153 Gigabit Ethernet Adapter for my 2nd port. Specifically, I use this one: <https://www.bestbuy.com/site/insignia-usb-3-0-to-gigabit-ethernet-adapter-white/3510527.p?skuId=3510527>
+
+    - A way to connect directly to the Raspberry Pi (monitor and keyboard). There are times when it will become inaccessable to the network and you will be unable to ssh in.
 
 -   Wi-Fi router that can be put into AP mode. I'm using a TP-Link Archer C1200v3
 
--   A laptop to do configuration changes
+-   A laptop or computer with wifi to do configuration changes
 
 -   Determine if your ISP supports IPv6. Mine does, so I'll cover it as an optional part
+
+## Raspberry Pi setup
+
+Before changing your network, it is a good idea to get the Raspberry Pi set up as much as possible. This includes strengthening its security, since it will be what sits between the internet and your network. The security tips are taken from <https://raspberrytips.com/security-tips-raspberry-pi/>.
+
+**1.** Image an SD card with Raspberry Pi OS Lite: <https://www.raspberrypi.org/software/>. The Raspberry Pi Imager on works nicely. If you use the Imager, you can press Ctrl+Shift+X and it will let you set some configuration values, such as enabling ssh.
+
+
+
 
 ## Steps
 
