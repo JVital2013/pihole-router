@@ -32,54 +32,111 @@ If you're feeling adventurous, I detail herein how I rebuilt my entire home netw
 
 -   Raspberry Pi, or some other computer/server capable of running Pi-Hole. It should probably be a physical server, but if you're crafty enough you can probably virtualize it somehow. I'm using a Raspberry Pi 4 to get an edge on Ethernet speeds.
 
--   The server needs to have 2 ethernet ports. I use an RTL8153 Gigabit Ethernet Adapter for my 2nd port. Specifically, I use this one: <https://www.bestbuy.com/site/insignia-usb-3-0-to-gigabit-ethernet-adapter-white/3510527.p?skuId=3510527>
+    - The Raspberry Pi needs to have 2 ethernet ports. I use an RTL8153 Gigabit Ethernet Adapter for my 2nd port. Specifically, I use this one: <https://www.bestbuy.com/site/insignia-usb-3-0-to-gigabit-ethernet-adapter-white/3510527.p?skuId=3510527>
+
+    - (Optional) A way to connect directly to the Raspberry Pi (monitor and keyboard). There are times when it might become inaccessable to the network and you will be unable to ssh in.
 
 -   Wi-Fi router that can be put into AP mode. I'm using a TP-Link Archer C1200v3
 
--   A laptop to do configuration changes
+-   A laptop or computer with wifi to do configuration changes
 
 -   Determine if your ISP supports IPv6. Mine does, so I'll cover it as an optional part
 
-## Steps
+## Raspberry Pi setup
+
+Before changing your network, it is a good idea to get the Raspberry Pi set up as much as possible. This includes strengthening its security, since it will be what sits between the internet and your network.
+
+**1.** Image an SD card with Raspberry Pi OS Lite: <https://www.raspberrypi.org/software/>. The Raspberry Pi Imager works nicely. If you use the Imager, you can press Ctrl+Shift+X and it will let you set general setup values, from step 3.
+
+**2.** Insert the SD card into the Pi. Connect your Pi to your current network with an ethernet cable. Attach the monitor and keyboard now, if you want. Power on the pi.
+
+**3.** General Setup:
+
+   1. Type `sudo raspi-config` (not necessary if you set the options using Raspberry Pi Imager).
+   2. Select Update
+   3. Turn on ssh if you plan on having your Pi be headless. Interface Options/SSH
+   4. Set System Options/Hostname if you want
+   5. Localization Options
+   6. Finish to exit
+
+**4.** Update system and installed software:
+
+     sudo apt update
+     sudo apt full-upgrade
+
+**5.** There are various things you can do to improve security. Rather than retyping them all, this is a good source for some things to do: <https://www.raspberrypi.org/documentation/configuration/security.md>
+
+**6.** Unattended upgrades (<https://wiki.debian.org/UnattendedUpgrades>) is a package that will install security updates automatically.
+
+The wiki link has full information, but in short this will install it:
+
+    sudo apt install unattended-upgrades
+
+To make it run automatically, do the following:
+
+    sudo nano /etc/apt/apt.conf.d/02periodic
+
+Add the following lines:
+
+    // Control parameters for cron jobs by /etc/cron.daily/apt-compat //
+
+    // Enable the update/upgrade script (0=disable)
+    APT::Periodic::Enable "1";
+
+    // Do "apt-get update" automatically every n-days (0=disable)
+    APT::Periodic::Update-Package-Lists "1";
+
+    // Do "apt-get upgrade --download-only" every n-days (0=disable)
+    APT::Periodic::Download-Upgradeable-Packages "1";
+
+    // Run the "unattended-upgrade" security upgrade script
+    // every n-days (0=disabled)
+    // Requires the package "unattended-upgrades" and will write
+    // a log in /var/log/unattended-upgrades
+    APT::Periodic::Unattended-Upgrade "1";
+
+    // Do "apt-get autoclean" every n-days (0=disable)
+    APT::Periodic::AutocleanInterval "21";
+
+**7.** Install iptables
+
+    sudo apt install iptables-persistent #Say yes at the prompt to save current rules
+    shutdown -P now
+    
+You can unplug the ethernet from the Raspberry Pi now.
+       
+
+## Firewall Steps
 
 **1.**  Have your modem running in it's normal "router" mode with a working internet connection.
 
-**2.**  Image an SD card with Raspberry Pi OS Lite \([https://www.raspberrypi.org/software/operating-systems/](https://www.raspberrypi.org/software/operating-systems/)\) and put it in the Pi.
-
-**3.**  Put your wireless router into AP mode. From here on, I'm going to call this your "AP" to avoid confusion. Configure the Wi-Fi network as desired on the AP (SSID, Security, Channel, etc). Also configure a static IP on it:
+**2.**  Put your wireless router into AP mode. From here on, I'm going to call this your "AP" to avoid confusion. Configure the Wi-Fi network as desired on the AP (SSID, Security, Channel, etc). Also configure a static IP on it:
 
         IP: 192.168.1.2
         Subnet Mask: 255.255.255.0
         Gateway: 192.168.1.1
 
-**4.**  Turn off the WiFi broadcast on your modem (if any)
+**3.**  Turn off the WiFi broadcast on your modem (if any)
 
-**5.**  Connect the USB Ethernet port to the Pi and plug an ethernet cord from it into the WAN port of the AP
+**4.**  Connect the USB Ethernet port to the Pi and plug an ethernet cord from it into the WAN port of the AP
 
-**6.**  Plug an ethernet cord from your modem into the onboard ethernet port.
+**5.**  Plug an ethernet cord from your modem into the onboard ethernet port of the Pi.
 
 At this point, your Modem, Pi, and AP should be connected like this:
 
 <img src="https://github.com/JVital2013/pihole-router/raw/main/images/diagram-setup.jpg" width="500">
 
-**7.**  Boot the Pi. Let it do its initial configuration, and do things like change the pi account password, set timezone, etc.
+**7.**  Boot the Pi.
 
-**8.**  Run the following commands:
+**8.**  Do a typical Pi-Hole installation as instructed at [https://github.com/pi-hole/pi-hole/#one-step-automated-install](https://github.com/pi-hole/pi-hole/#one-step-automated-install). Choose eth0 as the interface you're using (Onboard Ethernet). Set a static IP when prompted; just use the current one for now. This will be changing later. Use IPv4 only for now; we'll get to IPv6 later. Set everything else in the Pi-Hole setup however you want.
 
-        sudo apt update
-        sudo apt upgrade
-        sudo apt install iptables-persistent #Say yes at the prompt to save current rules
-        sudo reboot
-
-**9.**  Do a typical Pi-Hole installation as instructed at [https://github.com/pi-hole/pi-hole/#one-step-automated-install](https://github.com/pi-hole/pi-hole/#one-step-automated-install). Choose eth0 as the interface you're using (Onboard Ethernet). Set a static IP when prompted; just use the current one for now. This will be changing later. Use IPv4 only for now; we'll get to IPv6 later. Set everything else in the Pi-Hole setup however you want.
-
-**10.**  Test Pi-Hole and make sure it's working as-is (eg. use dig or nslookup to query a record from it)
+**9.**  Test Pi-Hole and make sure it's working as-is (eg. use dig or nslookup to query a record from it)
 
 **From here on, we're turning your network upside down! Make sure you won't need the internet for a while in case everything goes south.**
 
-**11.**  Put your modem into bridged mode. This makes it so that the modem doesn't do any routing/DHCP/etc, and passes it off to another device instead. Each modem is different, so look this up how to do this in your modem's manual.
+**10.**  Put your modem into bridged mode. This makes it so that the modem doesn't do any routing/DHCP/etc, and passes it off to another device instead. Each modem is different, so look this up how to do this in your modem's manual.
 
-**12.**  Edit /etc/dhcpcd.conf on the Pi. Scroll down until you see the configs for "interface eth0" and "interface eth1" (eth1 may not be there). Comment them out and replace it with the following:
+**11.**  Edit /etc/dhcpcd.conf on the Pi. Scroll down until you see the configs for "interface eth0" and "interface eth1" (eth1 may not be there). Comment them out and replace it with the following:
 
     interface eth0
       static domain_name_servers=8.8.8.8
@@ -91,7 +148,7 @@ I'm not setting a static IP for eth0 (the modem), so it's going to aquire an IP 
 
 On eth1, we're establishing that the Pi's IP address will be 192.168.1.1, with a subnet mask of 255.255.255.0
 
-**13.**  Edit /etc/iptables/rules.v4 on the Pi to [match this file here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv4/rules.v4). There's a lot going on here, so let's break it down a bit
+**12.**  Edit /etc/iptables/rules.v4 on the Pi to [match this file here](https://github.com/JVital2013/pihole-router/blob/main/examples/ipv4/rules.v4). There's a lot going on here, so let's break it down a bit
 
 **The \*nat section has 3 rules of interest.**
 
@@ -107,25 +164,25 @@ On eth1, we're establishing that the Pi's IP address will be 192.168.1.1, with a
 
 -   The `-A FORWARD -i eth1 -m tcp -p tcp --dport 853 -j DROP` lines prevents DNS over TLS
 
-**14.**  Edit /etc/sysctl.conf. Look for the line that has `net.ipv4.ip_forward=1` and uncomment it. This enables forwarding packets between the network interfaces
+**13.**  Edit /etc/sysctl.conf. Look for the line that has `net.ipv4.ip_forward=1` and uncomment it. This enables forwarding packets between the network interfaces
 
-**15.**  Reboot the Pi.
+**14.**  Reboot the Pi.
 
-**16.**  Once the Pi comes back up, you can connect a laptop to the AP's WiFi. Give the laptop a static IP:
+**15.**  Once the Pi comes back up, you can connect a laptop to the AP's WiFi. Give the laptop a static IP:
 
     IP: 192.168.1.3
     Subnet Mask: 255.255.255.0
     Gateway: 192.168.1.1
 
-**17.**  At this point, your new network should look something like this:
+**16.**  At this point, your new network should look something like this:
 
 <img src="https://github.com/JVital2013/pihole-router/raw/main/images/diagram-intermediate.jpg" width="600">
 
-**18.**  SSH into the pi from your laptop (use the 192.168.1.1 as the IP). Then, run `pihole -r`. When prompted, choose reconfigure. Choose "eth1" as the interface you're using (USB Ethernet). It should confirm that you're using 192.168.1.1 as the IP; go ahead and confirm those settings. Accept everything else
+**17.**  SSH into the pi from your laptop (use the 192.168.1.1 as the IP). Then, run `pihole -r`. When prompted, choose reconfigure. Choose "eth1" as the interface you're using (USB Ethernet). It should confirm that you're using 192.168.1.1 as the IP; go ahead and confirm those settings. Accept everything else
 
-**19.**  Edit /etc/dhcpcd.conf again and make sure it looks the same as you left it in step 12. Correct any edited lines.
+**18.**  Edit /etc/dhcpcd.conf again and make sure it looks the same as you left it in step 12. Correct any edited lines.
 
-**20.** Sign into the Pi-Hole web interface and do some basic configuration
+**19.** Sign into the Pi-Hole web interface and do some basic configuration
 
   **DNS**
 
@@ -145,9 +202,9 @@ On eth1, we're establishing that the Pi's IP address will be 192.168.1.1, with a
 
   -  Router (gateway) IP address: 192.168.1.1
 
-**21.**  For good measure, reboot the pi again.
+**20.**  For good measure, reboot the pi again.
 
-**22.**  On the Pi, run `ip -4 addr`. It should looks something like this:
+**21.**  On the Pi, run `ip -4 addr`. It should looks something like this:
 
     1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
 
@@ -169,7 +226,7 @@ On eth1, we're establishing that the Pi's IP address will be 192.168.1.1, with a
 
   Of interest, you want to make sure that you have a public IP address on eth0. eth1 should have an IP of 192.168.1.1.
 
-**23.**  Put your laptop's network configuration back to dynamic/DHCP.
+**22.**  Put your laptop's network configuration back to dynamic/DHCP.
 
 OK, big moment: take a breath and try to load something on the internet. If you did everything right, you should be greeted with a successfully loaded web page!
 
